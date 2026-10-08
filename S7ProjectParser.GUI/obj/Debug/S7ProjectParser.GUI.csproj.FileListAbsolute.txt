@@ -1,0 +1,11 @@
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\bin\Debug\S7ProjectParser.GUI.exe.config
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\bin\Debug\S7ProjectParser.GUI.exe
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\bin\Debug\S7ProjectParser.GUI.pdb
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\bin\Debug\S7ProjectParser.dll
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.csprojAssemblyReference.cache
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.MainForm.resources
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.csproj.GenerateResource.cache
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.csproj.CoreCompileInputs.cache
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.csproj.CopyComplete
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.exe
+D:\Desktop\S7ProjectParser\S7ProjectParser.GUI\obj\Debug\S7ProjectParser.GUI.pdb
