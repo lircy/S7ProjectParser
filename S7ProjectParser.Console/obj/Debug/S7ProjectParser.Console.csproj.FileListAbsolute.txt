@@ -1,7 +1,6 @@
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\bin\Debug\S7ProjectParser.Console.exe
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\bin\Debug\S7ProjectParser.Console.pdb
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\bin\Debug\S7ProjectParser.dll
-D:\Desktop\S7ProjectParser\S7ProjectParser.Console\obj\Debug\S7ProjectParser.Console.csprojAssemblyReference.cache
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\obj\Debug\S7ProjectParser.Console.csproj.CoreCompileInputs.cache
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\obj\Debug\S7ProjectParser.Console.csproj.CopyComplete
 D:\Desktop\S7ProjectParser\S7ProjectParser.Console\obj\Debug\S7ProjectParser.Console.exe
