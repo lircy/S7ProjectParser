@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using S7ProjectParser;
 // 命名空间 S7ProjectParser.Console 与 System.Console 同名冲突，控制台调用用 System.Console 限定
@@ -7,11 +6,10 @@ using S7ProjectParser;
 namespace S7ProjectParser.Console
 {
     /// <summary>
-    /// 无界面测试工具，调用序列与参考驱动 DriverTest 一致（去掉通讯部分）：
-    ///   Open → Browse → 打印变量表 → Close
-    /// 本库为文件解析器：变量表只有符号名 / 地址 / 类型三列
-    /// （Browse 与驱动一致返回全部叶子条目 VarInfo，不支持的类型已被跳过）。
-    /// 错误文本由 S7Project.ErrorText 提供（中文）。
+    /// 无界面测试工具，调用习惯与 TiaProjectParser 的 TiaProjectExplorer 一致：
+    ///   Open（静态工厂，异常报错）→ using 内遍历变量树 → Dispose
+    /// 打印每个设备的变量表（SYMBOLIC-NAME / ACCESS-SEQUENCE / TYP：
+    /// 完整符号路径 / 通讯绝对地址 / 软数据类型，不支持的类型跳过）。
     /// 用法：
     ///   S7ProjectParser.Console <工程目录或.s7p文件>
     /// </summary>
@@ -29,43 +27,41 @@ namespace S7ProjectParser.Console
                 return 1;
             }
 
-            string path = args[0];
-
             try
             {
-                int res;
-
-                // 1) 打开工程（参数为 STEP 7 工程路径）
-                S7Project project = new S7Project();
-                res = project.Open(path);
-                if (res != 0)
+                using (S7ProjectExplorer explorer = S7ProjectExplorer.Open(args[0]))
                 {
-                    System.Console.WriteLine("Open - Error: " + S7Project.ErrorText(res));
-                    return 1;
-                }
-                System.Console.WriteLine("Main - Open 完成");
+                    System.Console.WriteLine("Main - Open 完成: " + explorer.ProjectName);
+                    System.Console.WriteLine("Main - Starte Browse...");
 
-                // 2) 浏览变量清单（与驱动的 Browse 对齐）
-                System.Console.WriteLine("Main - Starte Browse...");
-                List<VarInfo> vars = new List<VarInfo>();
-                res = project.Browse(out vars);
-                System.Console.WriteLine("Main - Browse res=" + res);
-                if (res != 0)
-                {
-                    System.Console.WriteLine("Browse - Error: " + S7Project.ErrorText(res));
-                    project.Close();
-                    return 1;
+                    int total = 0;
+                    foreach (S7Node device in explorer.GetRootObjects())
+                    {
+                        System.Console.WriteLine("== " + device.Name + " ==");
+                        System.Console.WriteLine("====================== VARIABLENHAUSHALT ======================");
+                        System.Console.WriteLine("SYMBOLIC-NAME/ACCESS-SEQUENCE/TYP");
+                        foreach (S7Node child in device.Children)
+                        {
+                            string prefix = RootPrefixOf(child);
+                            if (prefix == null) continue; // 警告节点等
+                            foreach (S7Node node in explorer.EnumerateTree(child, 20))
+                            {
+                                if (node.Kind != S7NodeKind.Variable) continue;
+                                if (node.Softdatatype == Softdatatype.S7COMMP_SOFTDATATYPE_UDEFINED) continue;
+                                string typeName;
+                                if (!Softdatatype.Types.TryGetValue(node.Softdatatype, out typeName))
+                                {
+                                    typeName = "0x" + node.Softdatatype.ToString("X");
+                                }
+                                System.Console.WriteLine(String.Format("{0,-16} / {1,-24} / {2,-10}",
+                                    prefix + "." + node.Symbol, node.ComAddress, typeName));
+                                total++;
+                            }
+                        }
+                        System.Console.WriteLine("===============================================================");
+                    }
+                    System.Console.WriteLine("Main - Browse 共 " + total + " 条");
                 }
-
-                // 3) 打印变量表（解析结果：SYMBOLIC-NAME / ACCESS-SEQUENCE / TYP）
-                System.Console.WriteLine("====================== VARIABLENHAUSHALT ======================");
-                System.Console.WriteLine("SYMBOLIC-NAME/ACCESS-SEQUENCE/TYP");
-                for (int i = 0; i < vars.Count; i++)
-                {
-                    System.Console.WriteLine(String.Format("{0,-16} / {1,-24} / {2,-10}",
-                        vars[i].Name, vars[i].AccessSequence, Softdatatype.Types[vars[i].Softdatatype]));
-                }
-                System.Console.WriteLine("===============================================================");
 
                 try
                 {
@@ -75,8 +71,6 @@ namespace S7ProjectParser.Console
                 catch (InvalidOperationException)
                 {
                 }
-                // 5) 关闭工程
-                project.Close();
                 System.Console.WriteLine("Main - ENDE");
                 return 0;
             }
@@ -85,6 +79,33 @@ namespace S7ProjectParser.Console
                 System.Console.Error.WriteLine("错误: " + ex.Message);
                 return 1;
             }
+        }
+
+        /// <summary>块/区域节点的变量表根前缀（DB1、IArea、MArea 等）；非变量容器返回 null。</summary>
+        private static string RootPrefixOf(S7Node node)
+        {
+            if (node.Kind == S7NodeKind.Datablock)
+            {
+                int dbNumber;
+                return S7ProjectExplorer.TryExtractDbNumber(node.Name, out dbNumber)
+                    ? "DB" + dbNumber
+                    : null;
+            }
+            if (node.Kind == S7NodeKind.SymbolArea)
+            {
+                var area = node.Source as PlcSymbolArea;
+                if (area == null) return null;
+                switch (area.Name)
+                {
+                    case "Inputs": return "IArea";
+                    case "Outputs": return "QArea";
+                    case "Merker": return "MArea";
+                    case "S7Timers": return "S7Timers";
+                    case "S7Counters": return "S7Counters";
+                    default: return null;
+                }
+            }
+            return null;
         }
     }
 }
